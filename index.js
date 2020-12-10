@@ -1,7 +1,38 @@
 //to get access to the express library
 const express = require('express');  
+const mongoose = require('mongoose');
+const cookieSession = require('cookie-session');
+const passport = require('passport');
+const keys = require('./config/keys');
+require('./models/User');
+require('./services/passport');
+
+// Using mongoose to connect to the mongodb database
+mongoose.connect(keys.mongoURI);
+
 //Generates a new application which represents a running express app 
-const app = express();      
+const app = express();
+
+//app.use() -> wiring up middleware functionalities
+
+//Telling the application to make use of cookies
+app.use(
+    // Calling the cookieSession() function
+    // {} -> config object
+    // first param -> maxAge -> how long the cookie can exist in the browser before it automatically expires
+    // second param -> key -> used to encrypt our cookie
+    cookieSession({
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        keys: [keys.cookieKey]
+    })
+);
+
+//Telling passport to make use of cookies to handle authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
+require('./routes/authRoutes')(app);
+
 
 //Route handler associated with a given route
 
@@ -14,9 +45,9 @@ const app = express();
     6. res.send({ hi: 'there'} - immediately send some JSON back to who ever made this request
 
 */
-app.get('/', (req, res) => {
-    res.send({ bye: 'buddy'});
-});
+// app.get('/', (req, res) => {
+//     res.send({ bye: 'buddy'});
+// });
 
 //Dynamically figure out what PORT heroku should be listening to
 // If env variable is defined by heroku, use PORT otherwise use 5000 (Prod. vs Dev. env)
