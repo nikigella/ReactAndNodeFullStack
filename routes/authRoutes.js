@@ -10,12 +10,20 @@ module.exports = (app) =>  {
 
     // Route handler to handle the case in which the user visits /auth/google/callback
     // Exchange the code to get the user's profile from the google server
-    app.get('/auth/google/callback', passport.authenticate('google'))
+    // passport.authenticate('google') is a middleware function
+    app.get(
+        '/auth/google/callback', 
+        passport.authenticate('google'),
+        (req, res) => {
+            res.redirect('/surveys');
+        } 
+    );
 
     //An authenticate user makes a request to the below route and they log out
     app.get('/api/logout', (req, res) => {
         req.logout();
-        res.send(req.user);   //req.user is destroyed by passport
+        // res.send(req.user);   //req.user is destroyed by passport
+        res.redirect('/');
     });
 
     app.get('/api/current_user', (req, res) => {

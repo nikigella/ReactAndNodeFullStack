@@ -40,29 +40,25 @@ passport.use(
         callbackURL: '/auth/google/callback',
         proxy: true
     }, 
-        (accessToken, refreshToken, profile, done) => {
+        async (accessToken, refreshToken, profile, done) => {
            
-            
             // Look through the users collection and find the first record
             // inside that collection with google id same as profile id returned
             // by oauth process
             // This returns a promise and it doesn't return the user immediately
-            User.findOne({ googleId: profile.id })
-                .then((existingUser) => {
-                    if (existingUser) {
-                        // we already have a record with given profile id
-                        done(null, existingUser);
-                    } else {
-                        // we don't have a user record with this ID, make a new record
-                         
-                        // use model class to create a new instance of a user
-                        new User({ googleId: profile.id})
-                        // save() -> it'll take the model instance and save it to the database
-                        // and it's also an asynchronous operation
-                            .save()
-                            .then(user => done(null, user));
-                    }
-                })
+            const existingUser = await User.findOne({ googleId: profile.id })
+            if (existingUser) {
+                // we already have a record with given profile id
+                done(null, existingUser);
+            } else {
+                // we don't have a user record with this ID, make a new record
+                    
+                // use model class to create a new instance of a user
+                 // save() -> it'll take the model instance and save it to the database
+                // and it's also an asynchronous operation
+                const user = await new User({ googleId: profile.id}).save()
+                done(null, user);
+            }
         }
     )
 );

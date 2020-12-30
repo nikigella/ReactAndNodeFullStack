@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+const bodyParser = require('body-parser');
 const keys = require('./config/keys');
 require('./models/User');
 require('./services/passport');
@@ -14,6 +15,9 @@ mongoose.connect(keys.mongoURI);
 const app = express();
 
 //app.use() -> wiring up middleware functionalities
+
+// POST/PUT request type - Parses the request body and assigns that to the req.body to the route handlers
+app.use(bodyParser.json());
 
 //Telling the application to make use of cookies
 app.use(
@@ -32,7 +36,21 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 require('./routes/authRoutes')(app);
+require('./routes/billingRoutes')(app);
 
+// If we are on Heroku and in production, run this block of code below
+if (process.env.NODE_ENV === 'production') {
+    // Express will serve up production assets
+    // like our main.js or main.css file!
+    app.use(express.static('client/build'));
+
+    // Express will serve up the index.html file
+    // if it doesn't recognize the route
+    const path = require('path');
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+    });
+}
 
 //Route handler associated with a given route
 
