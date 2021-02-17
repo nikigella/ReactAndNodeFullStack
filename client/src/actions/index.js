@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FETCH_USER } from './types';
+import { FETCH_USER, FETCH_SURVEYS } from './types';
 
 // We are going to refactor this action creator 
 // to use the async/await syntax because the get 
@@ -49,3 +49,10 @@ export const submitSurvey = (values, history) => async (dispatch) => {
     history.push('/surveys');
     dispatch({ type: FETCH_USER, payload: res.data })
 };
+
+export const fetchSurveys = () => async (dispatch) => {
+    // Fetch all surveys from the backend
+    const res = await axios.get('/api/surveys');
+
+    dispatch({ type: FETCH_SURVEYS, payload: res.data });
+}
